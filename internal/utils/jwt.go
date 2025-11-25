@@ -18,7 +18,7 @@ func GenerateJWT(secret string, userId uint, expireIn time.Duration) (string, er
 func ParseJWT(secret, tokenStr string) (jwt.MapClaims, error) {
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, jwt.ErrTokenInvalidType
+			return nil, jwt.ErrTokenUnverifiable
 		}
 		return []byte(secret), nil
 	})
