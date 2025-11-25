@@ -5,6 +5,7 @@ import (
 	"runtime"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rekysda/sistergo/internal/config"
 	"github.com/rekysda/sistergo/internal/models"
 	"gorm.io/gorm"
 )
@@ -27,7 +28,7 @@ type SystemInfo struct {
 }
 
 // GetDashboard returns dashboard statistics
-func GetDashboard(db *gorm.DB) gin.HandlerFunc {
+func GetDashboard(db *gorm.DB, cfg *config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userIDVal, exists := c.Get("user_id")
 		if !exists {
@@ -57,7 +58,7 @@ func GetDashboard(db *gorm.DB) gin.HandlerFunc {
 
 		// Recent logs - filter based on user role
 		var recentLogs []models.UserLog
-		if user.RoleID == 1 {
+		if user.RoleID == config.AdminRoleID {
 			// Admin sees all logs
 			db.Preload("User").Order("created_at desc").Limit(10).Find(&recentLogs)
 		} else {
@@ -67,14 +68,14 @@ func GetDashboard(db *gorm.DB) gin.HandlerFunc {
 
 		// Recent users (for admin)
 		var recentUsers []models.User
-		if user.RoleID == 1 {
+		if user.RoleID == config.AdminRoleID {
 			db.Preload("Role").Order("created_at desc").Limit(8).Find(&recentUsers)
 		}
 
 		// System info
 		sysInfo := SystemInfo{
 			GoVersion:    runtime.Version(),
-			Environment:  "production",
+			Environment:  cfg.AppEnv,
 			NumCPU:       runtime.NumCPU(),
 			NumGoroutine: runtime.NumGoroutine(),
 		}

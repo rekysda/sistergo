@@ -38,7 +38,7 @@ func main() {
 	r := gin.Default()
 
 	// Enable CORS
-	r.Use(middleware.CORS())
+	r.Use(middleware.CORS(cfg))
 
 	routes.RegisterRoutes(r, db, cfg)
 

@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rekysda/sistergo/internal/config"
 	"github.com/rekysda/sistergo/internal/models"
 	"github.com/rekysda/sistergo/internal/utils"
 	"gorm.io/gorm"
@@ -206,7 +207,7 @@ func DeleteUser(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		// Prevent deletion of admin users
-		if user.RoleID == 1 || strings.ToLower(user.Username) == "admin" {
+		if user.RoleID == config.AdminRoleID || strings.ToLower(user.Username) == config.DefaultAdminUsername {
 			c.JSON(http.StatusForbidden, gin.H{"error": "Cannot delete admin user"})
 			return
 		}

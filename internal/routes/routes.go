@@ -20,7 +20,7 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, cfg *config.Config) {
 		protected.Use(middleware.JWTAuth(cfg))
 		{
 			protected.GET("/me", controllers.Me(db, cfg))
-			protected.GET("/dashboard", controllers.GetDashboard(db))
+			protected.GET("/dashboard", controllers.GetDashboard(db, cfg))
 
 			// Profile routes
 			protected.GET("/profile", controllers.GetProfile(db))
