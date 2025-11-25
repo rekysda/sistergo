@@ -68,6 +68,17 @@ func DeleteMenu(db *gorm.DB) gin.HandlerFunc {
 }
 
 // Submenu
+func ListSubmenus(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var submenus []models.UserSubMenu
+		if err := db.Preload("Menu").Find(&submenus).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"submenus": submenus})
+	}
+}
+
 func CreateSubmenu(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var submenu models.UserSubMenu

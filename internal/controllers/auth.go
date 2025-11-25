@@ -21,8 +21,8 @@ type RegisterRequest struct {
 
 // Login request payload
 type LoginRequest struct {
-	Identifier    string `json:"identifier" binding:"required"` // username or email
-	Password string `json:"password" binding:"required"`
+	Identifier string `json:"identifier" binding:"required"` // username or email
+	Password   string `json:"password" binding:"required"`
 }
 
 func Register(db *gorm.DB) gin.HandlerFunc {
