@@ -77,9 +77,6 @@ func Login(db *gorm.DB, cfg *config.Config) gin.HandlerFunc {
 				return
 			}
 		}
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
-			return
-		}
 
 		if !utils.CheckPassword(user.Password, req.Password) {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
