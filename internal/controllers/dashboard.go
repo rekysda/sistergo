@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"os"
 	"runtime"
 
 	"github.com/gin-gonic/gin"
@@ -69,12 +70,18 @@ func GetDashboard(db *gorm.DB) gin.HandlerFunc {
 		// Get database version
 		dbVersion := getDatabaseVersion(db)
 
+		// Get environment from ENV or default to production
+		environment := os.Getenv("APP_ENV")
+		if environment == "" {
+			environment = "production"
+		}
+
 		response := DashboardResponse{
 			RecentLogs:  recentLogs,
 			RecentUsers: recentUsers,
 			SystemInfo: SystemInfo{
 				GoVersion:       runtime.Version(),
-				Environment:     "production",
+				Environment:     environment,
 				DatabaseVersion: dbVersion,
 			},
 			TotalUsers:  totalUsers,

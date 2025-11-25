@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -48,13 +49,13 @@ func ListUsers(db *gorm.DB) gin.HandlerFunc {
 		perPage := 10
 
 		if p := c.Query("page"); p != "" {
-			if _, err := c.GetQuery("page"); err {
-				page = 1
+			if val, err := strconv.Atoi(p); err == nil && val > 0 {
+				page = val
 			}
 		}
 		if pp := c.Query("per_page"); pp != "" {
-			if _, err := c.GetQuery("per_page"); err {
-				perPage = 10
+			if val, err := strconv.Atoi(pp); err == nil && val > 0 && val <= 100 {
+				perPage = val
 			}
 		}
 
@@ -153,8 +154,8 @@ func CreateUser(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
-		// Log user creation
-		db.Create(&models.UserLog{UserID: user.ID, Activity: "user_created"})
+		// Log user creation (ignore error as it's non-critical)
+		_ = db.Create(&models.UserLog{UserID: user.ID, Activity: "user_created"}).Error
 
 		c.JSON(http.StatusCreated, gin.H{"user": user, "message": "User created successfully"})
 	}
