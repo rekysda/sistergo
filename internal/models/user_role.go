@@ -14,7 +14,7 @@ type UserRole struct {
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 
-	Users             []User              `gorm:"foreignKey:RoleID" json:"users,omitempty"`
-	MenuAccessRules   []UserAccessMenu    `gorm:"foreignKey:RoleID" json:"menu_access_rules,omitempty"`
+	Users              []User              `gorm:"foreignKey:RoleID" json:"users,omitempty"`
+	MenuAccessRules    []UserAccessMenu    `gorm:"foreignKey:RoleID" json:"menu_access_rules,omitempty"`
 	SubmenuAccessRules []UserAccessSubmenu `gorm:"foreignKey:RoleID" json:"submenu_access_rules,omitempty"`
 }
