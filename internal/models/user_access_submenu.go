@@ -15,6 +15,6 @@ type UserAccessSubmenu struct {
 	UpdatedAt time.Time      `json:"updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 
-	Role    UserRole   `gorm:"foreignKey:RoleID" json:"role,omitempty"`
+	Role    UserRole    `gorm:"foreignKey:RoleID" json:"role,omitempty"`
 	Submenu UserSubMenu `gorm:"foreignKey:SubmenuID" json:"submenu,omitempty"`
 }

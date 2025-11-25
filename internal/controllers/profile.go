@@ -51,8 +51,8 @@ func UpdateProfile(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 		var payload struct {
-			Name  string `json:"name" binding:"required"`
-			Email string `json:"email" binding:"required,email"`
+			Name  string  `json:"name" binding:"required"`
+			Email string  `json:"email" binding:"required,email"`
 			Image *string `json:"image"`
 		}
 		if err := c.ShouldBindJSON(&payload); err != nil {
