@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rekysda/sistergo/internal/config"
 	"github.com/rekysda/sistergo/internal/database"
+	"github.com/rekysda/sistergo/internal/middleware"
 	"github.com/rekysda/sistergo/internal/routes"
 )
 
@@ -35,10 +36,16 @@ func main() {
 	}
 
 	r := gin.Default()
+
+	// Enable CORS
+	r.Use(middleware.CORS(cfg))
+
 	routes.RegisterRoutes(r, db, cfg)
 
 	addr := fmt.Sprintf(":%s", cfg.AppPort)
 	log.Printf("Starting server on %s", addr)
-	r.Run(addr)
+	if err := r.Run(addr); err != nil {
+		log.Fatalf("failed to start server: %v", err)
+	}
 	_ = os.Stdout
 }

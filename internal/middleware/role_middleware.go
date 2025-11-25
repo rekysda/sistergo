@@ -9,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// AdminOnly verifies that the authenticated user has role_id == 1 (super admin)
+// AdminOnly verifies that the authenticated user has admin role
 func AdminOnly(cfg *config.Config, db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userIDVal, exists := c.Get("user_id")
@@ -30,8 +30,8 @@ func AdminOnly(cfg *config.Config, db *gorm.DB) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		// Role 1 is 'admin' in Laravel app convention
-		if user.RoleID != 1 {
+		// Check admin role using constant
+		if user.RoleID != config.AdminRoleID {
 			c.JSON(http.StatusForbidden, gin.H{"error": "admin only"})
 			c.Abort()
 			return

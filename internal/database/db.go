@@ -48,13 +48,20 @@ func Seed(db *gorm.DB) error {
 	}
 	// Ensure an admin user exists
 	var adminUser models.User
-	if err := db.Where("username = ?", "admin").First(&adminUser).Error; err == gorm.ErrRecordNotFound {
+	if err := db.Where("username = ?", config.DefaultAdminUsername).First(&adminUser).Error; err == gorm.ErrRecordNotFound {
 		// Create admin user (default password: password)
 		hashed, err := utils.HashPassword("password")
 		if err != nil {
 			return err
 		}
-		admin := models.User{Name: "Administrator", Username: "admin", Email: "admin@example.com", Password: hashed, RoleID: 1, IsActive: true}
+		admin := models.User{
+			Name:     "Administrator",
+			Username: config.DefaultAdminUsername,
+			Email:    "admin@example.com",
+			Password: hashed,
+			RoleID:   config.AdminRoleID,
+			IsActive: true,
+		}
 		if err := db.Create(&admin).Error; err != nil {
 			return err
 		}

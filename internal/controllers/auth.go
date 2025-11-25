@@ -21,8 +21,8 @@ type RegisterRequest struct {
 
 // Login request payload
 type LoginRequest struct {
-	Identifier    string `json:"identifier" binding:"required"` // username or email
-	Password string `json:"password" binding:"required"`
+	Identifier string `json:"identifier" binding:"required"` // username or email
+	Password   string `json:"password" binding:"required"`
 }
 
 func Register(db *gorm.DB) gin.HandlerFunc {
@@ -76,9 +76,6 @@ func Login(db *gorm.DB, cfg *config.Config) gin.HandlerFunc {
 				c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
 				return
 			}
-		}
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid credentials"})
-			return
 		}
 
 		if !utils.CheckPassword(user.Password, req.Password) {
