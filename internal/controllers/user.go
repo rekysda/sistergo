@@ -12,6 +12,12 @@ import (
 	"gorm.io/gorm"
 )
 
+// AdminRoleID is the role ID for administrators
+const AdminRoleID = 1
+
+// AdminUsername is the default admin username that cannot be deleted
+const AdminUsername = "admin"
+
 // ListUsers returns paginated list of users with role and logs
 func ListUsers(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -171,8 +177,12 @@ func UpdateUser(db *gorm.DB) gin.HandlerFunc {
 		user.Email = payload.Email
 		user.RoleID = payload.RoleID
 
-		// Update password if provided
+		// Update password if provided (with validation)
 		if payload.Password != nil && *payload.Password != "" {
+			if len(*payload.Password) < 8 {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "password must be at least 8 characters"})
+				return
+			}
 			hash, err := utils.HashPassword(*payload.Password)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to hash password"})
@@ -200,7 +210,7 @@ func DeleteUser(db *gorm.DB) gin.HandlerFunc {
 		}
 
 		// Prevent deletion of admin users
-		if user.RoleID == 1 || strings.ToLower(user.Username) == "admin" {
+		if user.RoleID == AdminRoleID || strings.ToLower(user.Username) == AdminUsername {
 			c.JSON(http.StatusForbidden, gin.H{"error": "cannot delete admin user"})
 			return
 		}

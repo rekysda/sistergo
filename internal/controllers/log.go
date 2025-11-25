@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rekysda/sistergo/internal/models"
@@ -34,6 +35,12 @@ func ListLogs(db *gorm.DB) gin.HandlerFunc {
 	}
 }
 
+// LastLoginResult is used to store last login query results
+type LastLoginResult struct {
+	UserID    uint
+	LastLogin time.Time
+}
+
 // UserActivity returns users with their last login activity
 func UserActivity(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -47,12 +54,6 @@ func UserActivity(db *gorm.DB) gin.HandlerFunc {
 		db.Model(&models.User{}).Where("is_active = ?", true).Count(&totalActiveUsers)
 		db.Model(&models.UserLog{}).Where("activity LIKE ?", "%login%").Count(&totalLoginActivities)
 
-		// Get users with their latest login timestamp
-		type UserWithLastLogin struct {
-			models.User
-			LastLogin *string `json:"last_login"`
-		}
-
 		var users []models.User
 		var total int64
 		db.Model(&models.User{}).Where("is_active = ?", true).Count(&total)
@@ -63,15 +64,32 @@ func UserActivity(db *gorm.DB) gin.HandlerFunc {
 			return
 		}
 
+		// Get user IDs for batch query
+		userIDs := make([]uint, len(users))
+		for i, user := range users {
+			userIDs[i] = user.ID
+		}
+
+		// Batch query for last login times (avoid N+1 query problem)
+		var lastLogins []LastLoginResult
+		if len(userIDs) > 0 {
+			db.Model(&models.UserLog{}).
+				Select("user_id, MAX(created_at) as last_login").
+				Where("user_id IN ? AND activity LIKE ?", userIDs, "%login%").
+				Group("user_id").
+				Scan(&lastLogins)
+		}
+
+		// Create a map for quick lookup
+		lastLoginMap := make(map[uint]string)
+		for _, ll := range lastLogins {
+			lastLoginMap[ll.UserID] = ll.LastLogin.Format("2006-01-02 15:04:05")
+		}
+
 		// Build response with last login info
 		var result []map[string]interface{}
 		for _, user := range users {
-			var lastLog models.UserLog
-			lastLogin := ""
-			if err := db.Where("user_id = ? AND activity LIKE ?", user.ID, "%login%").
-				Order("created_at DESC").First(&lastLog).Error; err == nil {
-				lastLogin = lastLog.CreatedAt.Format("2006-01-02 15:04:05")
-			}
+			lastLogin := lastLoginMap[user.ID]
 			result = append(result, map[string]interface{}{
 				"id":         user.ID,
 				"name":       user.Name,

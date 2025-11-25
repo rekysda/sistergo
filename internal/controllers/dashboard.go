@@ -8,6 +8,12 @@ import (
 	"gorm.io/gorm"
 )
 
+// Dashboard display limits
+const (
+	DashboardRecentLogsLimit  = 10
+	DashboardRecentUsersLimit = 8
+)
+
 // Dashboard returns summary statistics and recent logs
 func Dashboard(db *gorm.DB) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -31,17 +37,17 @@ func Dashboard(db *gorm.DB) gin.HandlerFunc {
 
 		// Get recent logs based on role
 		var recentLogs []models.UserLog
-		if currentUser.RoleID == 1 {
+		if currentUser.RoleID == AdminRoleID {
 			// Admin sees all logs
-			db.Preload("User").Order("created_at DESC").Limit(10).Find(&recentLogs)
+			db.Preload("User").Order("created_at DESC").Limit(DashboardRecentLogsLimit).Find(&recentLogs)
 		} else {
 			// Regular users only see their own logs
-			db.Preload("User").Where("user_id = ?", userID).Order("created_at DESC").Limit(10).Find(&recentLogs)
+			db.Preload("User").Where("user_id = ?", userID).Order("created_at DESC").Limit(DashboardRecentLogsLimit).Find(&recentLogs)
 		}
 
 		// Get recent users for admin dashboard
 		var recentUsers []models.User
-		db.Order("date_created DESC").Limit(8).Find(&recentUsers)
+		db.Order("date_created DESC").Limit(DashboardRecentUsersLimit).Find(&recentUsers)
 
 		// Get counts
 		var totalUsers, totalActiveUsers, totalRoles, totalMenus int64
