@@ -22,31 +22,37 @@ docker-compose up --build
 
 API endpoints:
 - POST /api/register {name, email, password}
-- POST /api/login {email, password}
+- POST /api/login {identifier, password} (identifier bisa username atau email)
 - GET /api/health
 - GET /api/me (Bearer token)
+- GET /api/profile (Bearer token)
+- PUT /api/profile (Bearer token)
+- POST /api/profile/change-password (Bearer token)
 - Students (Bearer token):
   - GET /api/students
   - POST /api/students {name, email, nis}
   - GET /api/students/:id
   - PUT /api/students/:id
   - DELETE /api/students/:id
-   - Admin endpoints (role_id==1)
-     - GET /api/admin/roles
-     - POST /api/admin/roles
-     - PUT /api/admin/roles/:id
-     - DELETE /api/admin/roles/:id
-     - GET /api/admin/menus
-     - POST /api/admin/menus
-     - PUT /api/admin/menus/:id
-     - DELETE /api/admin/menus/:id
-     - POST /api/admin/submenus
-     - PUT /api/admin/submenus/:id
-     - DELETE /api/admin/submenus/:id
-     - GET /api/admin/settings
-     - POST /api/admin/settings
-
-Notes & next steps:
+- Admin endpoints (role_id==1, Bearer token)
+  - GET /api/admin/dashboard
+  - GET /api/admin/user-activity
+  - GET /api/admin/logs
+  - GET /api/admin/roles
+  - POST /api/admin/roles
+  - PUT /api/admin/roles/:id
+  - DELETE /api/admin/roles/:id
+  - GET /api/admin/roles/:id/permissions
+  - PUT /api/admin/roles/:id/permissions
+  - GET /api/admin/menus
+  - POST /api/admin/menus
+  - PUT /api/admin/menus/:id
+  - DELETE /api/admin/menus/:id
+  - POST /api/admin/submenus
+  - PUT /api/admin/submenus/:id
+  - DELETE /api/admin/submenus/:id
+  - GET /api/admin/settings
+  - POST /api/admin/settingsNotes & next steps:
 - You can map models and features from the original Laravel app into this skeleton: controllers, services, web templates, policies, etc.
 - Implement role-based access, validation, and richer user features as needed.
 
@@ -71,3 +77,43 @@ Use the token for authenticated routes:
 ```powershell
 curl -H "Authorization: Bearer <TOKEN>" http://localhost:8080/api/profile
 ```
+
+---
+
+## Otomatisasi (CI/CD)
+Aplikasi ini menggunakan GitHub Actions untuk otomatisasi build dan test. Setiap push atau pull request akan:
+- Install dependencies (`go mod tidy`)
+- Run tests (`go test ./...`)
+- Build aplikasi (`go build ./...`)
+- Build Docker image
+
+Tidak perlu awasi — semua berjalan otomatis di cloud.
+
+---
+
+## Jalankan Semua Request (Test Otomatis)
+Untuk test semua endpoint, gunakan script atau tool seperti Postman/Newman, atau buat script Go untuk hit semua API.
+
+Contoh script test sederhana (dalam Go):
+```go
+// test_all.go
+package main
+
+import (
+    "fmt"
+    "net/http"
+    "io/ioutil"
+)
+
+func main() {
+    // Test health
+    resp, _ := http.Get("http://localhost:8080/api/health")
+    body, _ := ioutil.ReadAll(resp.Body)
+    fmt.Println("Health:", string(body))
+    // Tambahkan test lain...
+}
+```
+
+Jalankan: `go run test_all.go`
+
+Atau gunakan Docker untuk run semua tanpa setup lokal.

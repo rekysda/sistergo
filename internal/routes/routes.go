@@ -37,6 +37,10 @@ func RegisterRoutes(r *gin.Engine, db *gorm.DB, cfg *config.Config) {
 				admin := protected.Group("/admin")
 				admin.Use(middleware.AdminOnly(cfg, db))
 			{
+				admin.GET("/dashboard", controllers.Dashboard(db))
+				admin.GET("/user-activity", controllers.UserActivity(db))
+				admin.GET("/logs", controllers.Logs(db))
+
 				admin.GET("/roles", controllers.ListRoles(db))
 				admin.POST("/roles", controllers.CreateRole(db))
 				admin.GET("/roles/:id", controllers.GetRole(db))

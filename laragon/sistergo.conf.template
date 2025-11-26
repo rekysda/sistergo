@@ -1,0 +1,22 @@
+# Laragon virtual host template for sistergo
+# Copy to C:\laragon\etc\apache2\sites-enabled\sistergo.conf
+
+<VirtualHost *:80>
+    ServerName sistergo.test
+    ServerAlias www.sistergo.test
+
+    # Reverse proxy to Go server running on 127.0.0.1:8080
+    ProxyPreserveHost On
+    ProxyRequests Off
+    ProxyPass / http://127.0.0.1:8080/
+    ProxyPassReverse / http://127.0.0.1:8080/
+
+    # Optional: disable directory listing
+    <Directory "C:/laragon/www/sistergo">
+        Options -Indexes
+        Require all granted
+    </Directory>
+
+    ErrorLog "${APACHE_LOG_DIR}/sistergo_error.log"
+    CustomLog "${APACHE_LOG_DIR}/sistergo_access.log" combined
+</VirtualHost>
